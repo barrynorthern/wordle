@@ -42,7 +42,7 @@ function makeGuess(possibleWords, feedback) {
   );
   const filteredWords = possibleWords.filter((word) => regex.test(word));
   state.guess = filteredWords[0];
-  //console.log(previousGuess, r, feedback);
+  //console.log(previousGuess, regex, feedback);
   return state.guess;
 }
 
@@ -98,7 +98,6 @@ function testMakeGuess(
     const word = possibleWords[i];
     state = {};
     const guessStats = [i, word];
-    ++i;
     let feedback = Array(5).fill(NOT_IN_STRING);
     let found = false;
     let attempts = 0;
@@ -156,9 +155,9 @@ async function main() {
     "https://raw.githubusercontent.com/barrynorthern/wordles/main/words.txt"
   );
   const text = await response.text();
-  const words = text.split("\n");
+  const words = text.split("\n").filter(Boolean);
   console.log("There are ", words.length, "words.");
-  //testMakeGuess(words, 340, 25, 6, 1);
+  //testMakeGuess(words, 14854, 25, 6);
   testMakeGuess(words);
 }
 
