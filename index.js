@@ -5,45 +5,28 @@ const NOT_IN_STRING = 2;
 // You can modify state inside makeGuess, changes will be
 // persisted across all the attempts made for a given word
 let state = {};
-const pt = (p) =>
-  p.found ? p.found : p.bad.size ? `[^${[...p.bad].join("")}]` : ".";
-const g = () => ({ found: null, bad: new Set() });
-function makeGuess(possibleWords, feedback) {
-  const previousGuess = state.guess;
-  if (!previousGuess) {
-    state.guess = "salet";
-    return state.guess;
-  }
-  state.place = state.place ?? new Array(5).fill().map(g);
-  state.good = state.good ?? new Set();
-  const misplaced = previousGuess
-    .split("")
-    .filter((_, i) => feedback[i] === WRONG_POSITION);
-  for (const m of misplaced) state.good.add(m);
+function makeGuess(a, f) {
+  let s = state, g = s.g;
+  if (!g) return s.g = "salet";
+  s.s = s.s ?? [0,0,0,0,0].map(() => ({ b: new Set() }));
+  s.r = s.r ?? new Set();
+  let m = [];
+  [...g].forEach((c, i) => f[i] === 1 && s.r.add(c) && m.push(c));
   for (let i = 0; i < 5; i++) {
-    if (state.place[i].found) continue;
-    const c = previousGuess[i];
-    if (feedback[i] === CORRECT_POSITION) {
-      state.place[i].found = c;
-      state.good.add(c);
-    } else if (feedback[i] === WRONG_POSITION) {
-      state.place[i].bad.add(c);
-    } else if (feedback[i] === NOT_IN_STRING) {
-      for (let j = 0; j < 5; j++) {
-        if (!state.place[j].found && (!misplaced.includes(c) || i === j))
-          state.place[j].bad.add(c);
-      }
+    if (s.s[i].f) continue;
+    let c = g[i];
+    switch(f[i]) {
+        case 0: s.s[i].f = c;s.r.add(c); break;
+        case 1: s.s[i].b.add(c); break;
+        case 2: [0,1,2,3,4].forEach(j => (!s.s[j].f && (!m.includes(c) || i === j)) && s.s[j].b.add(c))
     }
   }
-  const regex = new RegExp(
-    `^${[...state.good].map((c) => `(?=.*${c})`).join("")}${state.place
-      .map((p) => pt(p))
+  let r = new RegExp(
+    `^${[...s.r].map(c => `(?=.*${c})`).join("")}${s.s
+      .map(p => p.f ? p.f : p.b.size ? `[^${[...p.b].join("")}]` : ".")
       .join("")}$`
   );
-  const filteredWords = possibleWords.filter((word) => regex.test(word));
-  state.guess = filteredWords[0];
-  //console.log(previousGuess, r, feedback);
-  return state.guess;
+  return s.g = a.find(x => r.test(x));
 }
 
 function getFeedbackAtIndex(word, guess, index) {
@@ -81,7 +64,7 @@ function getFeedbackAtIndex(word, guess, index) {
 }
 
 function getFeedback(word, guess) {
-  return word.split("").map((_, i) => getFeedbackAtIndex(word, guess, i));
+  return [...word].map((_, i) => getFeedbackAtIndex(word, guess, i));
 }
 
 function testMakeGuess(
@@ -98,7 +81,6 @@ function testMakeGuess(
     const word = possibleWords[i];
     state = {};
     const guessStats = [i, word];
-    ++i;
     let feedback = Array(5).fill(NOT_IN_STRING);
     let found = false;
     let attempts = 0;
