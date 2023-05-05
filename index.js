@@ -6,27 +6,18 @@ const NOT_IN_STRING = 2;
 // persisted across all the attempts made for a given word
 let state = {};
 function makeGuess(a, f) {
-  let s = state, g = s.g;
-  if (!g) return s.g = "salet";
-  s.s = s.s ?? [0,0,0,0,0].map(() => ({ b: new Set() }));
-  s.r = s.r ?? new Set();
-  let m = [];
-  [...g].forEach((c, i) => f[i] === 1 && s.r.add(c) && m.push(c));
-  for (let i = 0; i < 5; i++) {
-    if (s.s[i].f) continue;
-    let c = g[i];
-    switch(f[i]) {
-        case 0: s.s[i].f = c;s.r.add(c); break;
-        case 1: s.s[i].b.add(c); break;
-        case 2: [0,1,2,3,4].forEach(j => (!s.s[j].f && (!m.includes(c) || i === j)) && s.s[j].b.add(c))
-    }
-  }
-  let r = new RegExp(
-    `^${[...s.r].map(c => `(?=.*${c})`).join("")}${s.s
-      .map(p => p.f ? p.f : p.b.size ? `[^${[...p.b].join("")}]` : ".")
-      .join("")}$`
-  );
-  return s.g = a.find(x => r.test(x));
+  if (!state.g) return state.g="salet";
+  let s=state,g=s.g,m=[],h=[...g];
+  s.s=s.s??h.map(()=>({b:new Set()}));
+  s.r=s.r??new Set();
+  h.map((c,i)=>f[i]===1&&s.r.add(c)&&m.push(c));
+  h.map((c,i)=>!s.s[i].f&&(
+    f[i]==0&&(s.s[i].f=c,s.r.add(c)),
+    f[i]==1&&s.s[i].b.add(c),
+    f[i]==2&&h.map((_,j)=>(!s.s[j].f&&(!m.includes(c)||i===j))&&s.s[j].b.add(c))));
+  let r=new RegExp(`^${[...s.r].map(c => `(?=.*${c})`).join("")}${s.s
+    .map(p => p.f?p.f:p.b.size?`[^${[...p.b].join("")}]`:".").join("")}$`);
+  return s.g=a.find(x => r.test(x));
 }
 
 function getFeedbackAtIndex(word, guess, index) {
@@ -138,7 +129,7 @@ async function main() {
     "https://raw.githubusercontent.com/barrynorthern/wordles/main/words.txt"
   );
   const text = await response.text();
-  const words = text.split("\n");
+  const words = text.split("\n").filter(Boolean);
   console.log("There are ", words.length, "words.");
   //testMakeGuess(words, 340, 25, 6, 1);
   testMakeGuess(words);
