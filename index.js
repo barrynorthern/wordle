@@ -5,13 +5,13 @@ const NOT_IN_STRING = 2;
 // You can modify state inside makeGuess, changes will be
 // persisted across all the attempts made for a given word
 let state = {};
-const makeGuess = (a, f) => (s=>!s.g?(s.g="salet"):((m,h)=>(
+const makeGuess=(a,f)=>(s=>!s.g?(s.g="salet"):((m,h)=>(
     s.s=s.s??h.map(()=>({b:new Set()})),s.r=s.r??new Set(),
     h.map((c,i)=>f[i]===1&&s.r.add(c)&&m.push(c)),
     h.map((c,i)=>!s.s[i].f&&(f[i]==0&&(s.s[i].f=c,s.r.add(c)),f[i]==1&&s.s[i].b.add(c),
     f[i]==2&&h.map((_,j)=>(!s.s[j].f&&(!m.includes(c)||i===j))&&s.s[j].b.add(c)))),
-    ((r) => s.g=a.find(x => r.test(x)))(new RegExp(`^${[...s.r].map(c=>`(?=.*${c})`).join("")}${s.s
-    .map(p => p.f?p.f:p.b.size?`[^${[...p.b].join("")}]`:".").join("")}$`))))([],[...s.g]))(state);
+    ((r)=>s.g=a.find(x => r.test(x)))(new RegExp(`^${[...s.r].map(c=>`(?=.*${c})`).join("")}${s.s
+    .map(p=>p.f?p.f:p.b.size?`[^${[...p.b].join("")}]`:".").join("")}$`))))([],[...s.g]))(state);
 
 function getFeedbackAtIndex(word, guess, index) {
   // correct (matched) index letter
