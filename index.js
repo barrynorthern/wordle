@@ -6,8 +6,7 @@ const NOT_IN_STRING = 2;
 // persisted across all the attempts made for a given word
 let state = {};
 function makeGuess(a, f) {
-  if (!state.g) return state.g="salet";
-  let s=state,g=s.g,m=[],h=[...g];
+  return ((s) => !s.g?(s.g="salet"):((m,h)=>{
   s.s=s.s??h.map(()=>({b:new Set()}));
   s.r=s.r??new Set();
   h.map((c,i)=>f[i]===1&&s.r.add(c)&&m.push(c));
@@ -17,7 +16,7 @@ function makeGuess(a, f) {
     f[i]==2&&h.map((_,j)=>(!s.s[j].f&&(!m.includes(c)||i===j))&&s.s[j].b.add(c))));
   let r=new RegExp(`^${[...s.r].map(c => `(?=.*${c})`).join("")}${s.s
     .map(p => p.f?p.f:p.b.size?`[^${[...p.b].join("")}]`:".").join("")}$`);
-  return s.g=a.find(x => r.test(x));
+  return s.g=a.find(x => r.test(x));})([],[...s.g]))(state);
 }
 
 function getFeedbackAtIndex(word, guess, index) {
